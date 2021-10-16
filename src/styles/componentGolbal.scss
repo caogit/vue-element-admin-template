@@ -1,0 +1,24 @@
+.el-select {
+  width: 100%;
+}
+.el-form-item {
+  
+  position: relative;
+}
+.el-form-item__content {
+
+}
+// search 无label时
+.nolabel {
+  .el-form-item__content {
+    width: 100%;
+  }
+}
+// 有label时
+.el-form-item__label {
+  width: 120px;
+}
+// search按钮通用样式
+.search_btn {
+  margin-left: 10px;
+}
