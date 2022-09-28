@@ -1,105 +1,130 @@
-/**
- * 这里是为了统一管理用户方面的所有内容，就将token拿到这里了，其实直接setToken在外面也可以
+import { login, logout, getInfo } from '@/api/user'
+import { getToken, setToken, removeToken } from '@/utils/auth'
+import router, { resetRouter } from '@/router'
 
- */
-import { getToken, setToken, removeToken } from '@/utils/auth';
-import { ApiUrl } from '@/api';
-
-const getDefaultState = function () {
-  return {
-    token: getToken(),
-    name: '',
-    avatar: '',
-  };
-};
-
-const state = getDefaultState();
+const state = {
+  token: getToken(),
+  name: '',
+  avatar: '',
+  introduction: '',
+  roles: []
+}
 
 const mutations = {
-  // 退出登陆后还原初始状态
-  RESET_STATE() {
-    Object.assign(state, getDefaultState());
-  },
-  // 设置用户Token
   SET_TOKEN: (state, token) => {
-    state.token = token;
+    state.token = token
   },
-  // 设置用户姓名
+  SET_INTRODUCTION: (state, introduction) => {
+    state.introduction = introduction
+  },
   SET_NAME: (state, name) => {
-    state.name = name;
+    state.name = name
   },
-  // 设置用户头像
   SET_AVATAR: (state, avatar) => {
-    state.avatar = avatar;
+    state.avatar = avatar
   },
-};
+  SET_ROLES: (state, roles) => {
+    state.roles = roles
+  }
+}
+
 const actions = {
-  // 设置用户Token值
-  setUserToken({ commit }, parms) {
+  // user login
+  login({ commit }, userInfo) {
+    const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      this._vm.request
-        .post(ApiUrl.USER.LOGIN, parms)
-        .then((res) => {
-          if (res.code == 200) {
-            let token = res.data.tokenHead + res.data.token;
-            commit('SET_TOKEN', token);
-            // 这步将token存到Cookies中，做的是一个双重保险
-            setToken(token);
-            resolve(token);
-          }
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+      login({ username: username.trim(), password: password }).then(response => {
+        const { data } = response
+        commit('SET_TOKEN', data.token)
+        setToken(data.token)
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
   },
-  // 获取用户信息
-  getUserInfo({ commit }) {
+
+  // get user info
+  getInfo({ commit, state }) {
     return new Promise((resolve, reject) => {
-      this._vm.request
-        .post('/userInfo')
-        .then((res) => {
-          if (res.code === 200) {
-            const { assistant, avatar } = res.data;
-            commit('SET_NAME', assistant);
-            commit('SET_AVATAR', avatar);
-            resolve(res.data);
-          }
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+      getInfo(state.token).then(response => {
+        const { data } = response
+
+        if (!data) {
+          reject('Verification failed, please Login again.')
+        }
+
+        const { roles, name, avatar, introduction } = data
+
+        // roles must be a non-empty array
+        if (!roles || roles.length <= 0) {
+          reject('getInfo: roles must be a non-null array!')
+        }
+
+        commit('SET_ROLES', roles)
+        commit('SET_NAME', name)
+        commit('SET_AVATAR', avatar)
+        commit('SET_INTRODUCTION', introduction)
+        resolve(data)
+      }).catch(error => {
+        reject(error)
+      })
+    })
   },
-  // 退出登陆
-  loginOut({ commit }) {
+
+  // user logout
+  logout({ commit, state, dispatch }) {
     return new Promise((resolve, reject) => {
-      removeToken();
-      commit('RESET_STATE');
-      this._vm.request
-        .post(ApiUrl.USER.LOGOUT)
-        .then((res) => {
-          if (res.code === 200) {
-            resolve();
-          }
-        })
-        .catch((err) => {
-          reject(err);
-        });
-    });
+      logout(state.token).then(() => {
+        commit('SET_TOKEN', '')
+        commit('SET_ROLES', [])
+        removeToken()
+        resetRouter()
+
+        // reset visited views and cached views
+        dispatch('tagsView/delAllViews', null, { root: true })
+
+        resolve()
+      }).catch(error => {
+        reject(error)
+      })
+    })
   },
-  // 清除Token
+
+  // remove token
   resetToken({ commit }) {
-    return new Promise(() => {
-      removeToken();
-      commit('RESET_STATE');
-    });
+    return new Promise(resolve => {
+      commit('SET_TOKEN', '')
+      commit('SET_ROLES', [])
+      removeToken()
+      resolve()
+    })
   },
-};
+
+  // dynamically modify permissions
+  async changeRoles({ commit, dispatch }, role) {
+    const token = role + '-token'
+
+    commit('SET_TOKEN', token)
+    setToken(token)
+
+    const { roles } = await dispatch('getInfo')
+
+    resetRouter()
+
+    // generate accessible routes map based on roles
+    const accessRoutes = await dispatch('permission/generateRoutes', roles, { root: true })
+    // dynamically add accessible routes
+    router.addRoutes(accessRoutes)
+
+    // reset visited views and cached views
+    dispatch('tagsView/delAllViews', null, { root: true })
+  }
+}
 
 export default {
   namespaced: true,
   state,
   mutations,
-  actions,
-};
+  actions
+}

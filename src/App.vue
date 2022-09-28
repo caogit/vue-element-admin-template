@@ -4,8 +4,8 @@
   </div>
 </template>
 
-<style>
-#app {
-  height: 100%;
+<script>
+export default {
+  name: 'App'
 }
-</style>
+</script>
