@@ -77,6 +77,32 @@ export const constantRoutes = [
         meta: { title: '数据看板', icon: 'dashboard' }
       }
     ]
+  },
+
+  {
+    path: '/detai',
+    component: Layout,
+    children: [
+      {
+        path: '',
+        name: 'Detail',
+        component: () => import('@/views/detail/index'),
+        meta: { title: '可跳转详情页', icon: 'dashboard' }
+      }
+    ]
+  },
+  {
+    path: '/detai/first',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '',
+        name: 'DetailFirst',
+        component: () => import('@/views/detail/first/index'),
+        meta: { title: 'first详情页', icon: 'detai' }
+      }
+    ]
   }
 
 ]

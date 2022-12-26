@@ -1,6 +1,6 @@
 <template>
   <div>
-    我是首页
+    <router-link to="/detai/first">跳转到first详情页</router-link>
   </div>
 </template>
 
