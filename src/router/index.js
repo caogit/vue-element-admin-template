@@ -92,6 +92,13 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/gaodeMap',
+    name: 'GaodeMap',
+    component: () => import('@/views/gaodeMap/index'),
+    meta: { title: '高德地图使用测试', icon: 'dashboard' }
+  },
+
+  {
     path: '/detai/first',
     component: Layout,
     hidden: true,
