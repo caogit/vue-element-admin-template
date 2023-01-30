@@ -13,7 +13,6 @@ export default {
   async mounted() {
     await this.initMap()
     this.complete()
-    this.addMarker()
   },
   methods: {
     addMarker() {
@@ -24,8 +23,10 @@ export default {
       this.map.add(marker)
     },
     complete() {
+      const that = this
       this.map && this.map.on('complete', function() {
         console.log('加载完成')
+        that.addMarker()
       })
     },
     initMap() {

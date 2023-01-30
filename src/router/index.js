@@ -95,7 +95,19 @@ export const constantRoutes = [
     path: '/gaodeMap',
     name: 'GaodeMap',
     component: () => import('@/views/gaodeMap/index'),
-    meta: { title: '高德地图使用测试', icon: 'dashboard' }
+    meta: { title: '探究高德地图使用', icon: 'dashboard' }
+  },
+  {
+    path: '/screen',
+    name: 'Screen',
+    component: () => import('@/views/screen/scale'),
+    meta: { title: '大屏适配scale', icon: 'dashboard' }
+  },
+  {
+    path: '/screenRem',
+    name: 'ScreenRem',
+    component: () => import('@/views/screen/rem'),
+    meta: { title: '大屏适配rem', icon: 'dashboard' }
   },
 
   {
