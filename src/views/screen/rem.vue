@@ -128,6 +128,11 @@ export default {
       setHtmlFontSize()
       window.addEventListener('resize', setHtmlFontSize)
     })()
+  },
+  beforeDestroy() {
+    window.onresize = null
+    const docEle = document.documentElement
+    docEle.style.fontSize = '16px'
   }
 }
 </script>
