@@ -17,7 +17,8 @@ import router from './router'
 import './icons' // icon
 import './permission' // permission control
 import './utils/error-log' // error log
-
+import VueECharts from 'vue-echarts'
+import 'echarts'
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -37,6 +38,7 @@ Vue.use(Element, {
 })
 
 Vue.config.productionTip = false
+Vue.component('v-chart', VueECharts)
 
 new Vue({
   el: '#app',
